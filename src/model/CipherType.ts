@@ -1,5 +1,5 @@
 type CypherType = {
-    key: string;
+    key: number;
     cipherText: string;
 }
 export default CypherType;

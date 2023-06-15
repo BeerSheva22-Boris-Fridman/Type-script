@@ -1,3 +1,52 @@
+import CipherDecipher from "./CipherDecipher";
+import CipherType from "./model/CipherType";
+import keyConfig from "./config/key-config.json";
+import { getRandomInt } from "./util/random";
+
+const MIN_CODE = 32;
+const MAX_CODE = 127;
+const ALPHABET_LENGTH = MAX_CODE - MIN_CODE + 1;
+
 export default class ShiftCipher implements CipherDecipher {
 
+    private _key!: number;
+
+    constructor() {
+
+        setInterval(() => this.updateKey(), keyConfig.interval);
+    }
+    
+    cipher(text: string): CipherType {
+        
+        const key = this._key;
+        const cipherKey = this.getKey(key);
+        const cipherText = Array.from(text).map((symb) => this.shiftSymbol(symb, cipherKey)).join('');
+        const res: CipherType = {
+            key: key,
+            cipherText: cipherText
+        }
+        return res;
+    }
+    getKey (key: number): number {
+        key = key % ALPHABET_LENGTH;
+        if (key < 0) {
+            key = ALPHABET_LENGTH + key;
+        }
+        return key;
+    }
+    shiftSymbol (symb: string, key: number): string {
+        const newCode = symb.charCodeAt(0) + key;
+        const shiftedSymb = newCode > MAX_CODE ? newCode - ALPHABET_LENGTH : newCode;
+        return String.fromCharCode(shiftedSymb);
+    }
+    decipher(cipher: CipherType): string {       
+        this._key = -cipher.key;
+        const cipherType = this.cipher(cipher.cipherText)
+        return cipherType.cipherText;
+    }
+    updateKey(): void {
+                
+        this._key = getRandomInt(1, 1234);
+    }
+    
 }

@@ -57,33 +57,34 @@ displayPerson({id: 123, date: "2000-10-10", name: "Vasya", gender: "male"});
 // for (let i = 0; i < 3; i++) {
 //     setTimeout(() => console.log(i));
 // }
+const MIN_CODE = 32
+const MAX_CODE = 127
+const ALPHABET_LENGTH = MAX_CODE - MIN_CODE + 1
 
-function cipher(text: string, key: number): string {
-    let result = "";
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        // Шифрование только для букв латинского алфавита
-        if (/[a-zA-Z]/.test(char)) {
-            const isUpperCase = char === char.toUpperCase();
-            const baseCharCode = isUpperCase ? "A".charCodeAt(0) : "a".charCodeAt(0);
-            const offset = (char.charCodeAt(0) - baseCharCode + key) % 26;
-            const shiftedCharCode = baseCharCode + offset;
-            const shiftedChar = String.fromCharCode(shiftedCharCode);
-            result += isUpperCase ? shiftedChar.toUpperCase() : shiftedChar;
-        } else {
-            result += char; // Если символ не является буквой, оставляем его без изменений
-        }
-    }
-    return result;
+function cipher (text: string, key: number): string {
+  key = getKey(key)
+  return Array.from(text).map((symb) => shiftSymbol(symb, key)).join('')
 }
 
-function decipher(text: string, key: number): string {
-    // Дешифрование — просто обратная операция к шифрованию
-    // Здесь можно применить ту же логику, но с отрицательным значением ключа
-    return cipher(text, -key);
+function decipher (text: string, key: number): string {
+  return cipher(text, -key)
 }
-console.log(cipher("abc",3));
 
+function getKey (key: number): number {
+  key = key % ALPHABET_LENGTH
+  if (key < 0) {
+    key = ALPHABET_LENGTH + key
+  }
+  return key
+}
+
+function shiftSymbol (symb: string, key: number): string {
+  const newCode = symb.charCodeAt(0) + key
+  const shiftedSymb = newCode > MAX_CODE
+    ? newCode - ALPHABET_LENGTH
+    : newCode
+  return String.fromCharCode(shiftedSymb)
+}
 
 const shape: Rectangle = new Rectangle (3, 4);
 let width = shape.width;
@@ -91,3 +92,4 @@ let width = shape.width;
 // интерфейс шифр и дешиф, прин объект а возвр не текст с свойствами
 //получ объект сайф с свойстваи, а возвращать текст
 //у каждого свои ключи итд
+
